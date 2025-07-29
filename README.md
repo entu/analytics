@@ -14,16 +14,18 @@ A privacy-focused, self-hosted web analytics platform built with Nuxt.js and Ope
 ## What Gets Tracked
 
 ### Automatic Tracking
-- Page views (including SPA navigation)
-- IP address and basic geolocation
-- Browser type and version
-- Operating system and version
-- Device type (Desktop/Mobile/Tablet)
-- Screen resolution and viewport size
-- Referrer information
-- User language preferences
-- Session tracking (per browser session)
-- Anonymous user tracking (persistent across sessions)
+- **Page views**: Automatic tracking on page load and SPA navigation
+- **Site identification**: From `data-site` attribute
+- **URL data**: Domain, path, query parameters, and page title
+- **Referrer**: Previous page that led to current page
+- **Browser info**: Name, version, and full user agent string
+- **Operating system**: Name, version, and mobile device detection
+- **Client IP**: For basic geolocation (server-side capture)
+- **Screen dimensions**: Physical screen resolution
+- **Viewport size**: Current browser window dimensions
+- **Language**: User's preferred language setting
+- **Session tracking**: Unique session ID per browser session (sessionStorage)
+- **User tracking**: Persistent anonymous user ID (localStorage)
 
 ### Custom Event Tracking
 Track any custom events like button clicks, form submissions, downloads, etc.
@@ -36,62 +38,40 @@ Track any custom events like button clicks, form submissions, downloads, etc.
 
 ### 1. Environment Setup
 
-Create a `.env` file:
+Copy the example environment file and configure your OpenSearch connection:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your OpenSearch configuration:
 
 ```bash
 # OpenSearch Configuration
-OPENSEARCH_URL=https://localhost:9200
-OPENSEARCH_USERNAME=admin
-OPENSEARCH_PASSWORD=admin
-
-# Optional: If using OpenSearch cloud or other auth
-# OPENSEARCH_API_KEY=your_api_key
+NUXT_OPENSEARCH_HOSTNAME=localhost
+NUXT_OPENSEARCH_PORT=9200
+NUXT_OPENSEARCH_USERNAME=admin
+NUXT_OPENSEARCH_PASSWORD=admin
 ```
 
-### 2. Install Dependencies
+### 2. Start the Development Server
 
 ```bash
-npm install
-```
-
-### 3. Start the Server
-
-```bash
-# Development
+# Development (with hot reload)
 npm run dev
 
-# Production
+# Production build and start
 npm run build
 npm start
-```
 
-### 4. Setup OpenSearch
+# Generate static site
+npm run generate
 
-The application will automatically create the necessary OpenSearch index (`analytics-events`) on first run.
+# Preview production build
+npm run preview
 
-If you need to manually create it or are using OpenSearch Dashboards:
-
-```json
-PUT /analytics-events
-{
-  "mappings": {
-    "properties": {
-      "timestamp": { "type": "date" },
-      "site_id": { "type": "keyword" },
-      "page_url": { "type": "text" },
-      "domain": { "type": "keyword" },
-      "path": { "type": "keyword" },
-      "query": { "type": "text" },
-      "user_agent": { "type": "text" },
-      "ip_address": { "type": "ip" },
-      "browser": { "type": "keyword" },
-      "os": { "type": "keyword" },
-      "device_type": { "type": "keyword" },
-      "session_id": { "type": "keyword" },
-      "event_type": { "type": "keyword" }
-    }
-  }
-}
+# Lint code
+npm run lint
 ```
 
 ## Integration with Your Website
@@ -101,8 +81,10 @@ PUT /analytics-events
 Add this single script tag to your website's `<head>` section:
 
 ```html
-<script src="https://analytics.entu.ee/ea.js" data-site="your-unique-site-id" async></script>
+<script src="https://your-analytics-domain.com/ea.js" data-site="your-unique-site-id" async></script>
 ```
+
+Replace `your-analytics-domain.com` with your actual domain where this analytics service is hosted.
 
 The script will automatically:
 - Extract the site ID from the `data-site` attribute
@@ -149,60 +131,72 @@ Each analytics event stored in OpenSearch contains:
 
 ```json
 {
-  "timestamp": "2025-01-15T10:30:00.000Z",
-  "site_id": "my-website",
-  "page_url": "https://example.com/page",
+  "@timestamp": "2025-07-29T10:30:00.000Z",
+  "site": "my-website",
   "domain": "example.com",
   "path": "/page",
   "query": "?utm_source=google",
-  "page_title": "Page Title",
+  "title": "Page Title",
   "referrer": "https://google.com",
-  "user_agent": "Mozilla/5.0...",
-  "ip_address": "192.168.1.100",
-  "browser": "Chrome",
-  "browser_version": "91.0",
-  "os": "Windows",
-  "os_version": "10",
-  "device_type": "Desktop",
-  "screen_resolution": "1920x1080",
-  "viewport_size": "1200x800",
+  "browser": {
+    "name": "Chrome",
+    "version": "91.0",
+    "agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36..."
+  },
+  "os": {
+    "name": "Windows",
+    "version": "10",
+    "mobile": false
+  },
+  "ip": "192.168.1.100",
+  "screen": "1920x1080",
+  "viewport": "1200x800",
   "language": "en-US",
-  "session_id": "session_123...",
-  "user_id": "user_456...",
-  "event_type": "pageview",
-  "event_name": "button_click",
-  "event_data": { "button_name": "signup" }
+  "session": "session_abc123_1234567890",
+  "user": "user_def456_1234567890",
+  "event": {
+    "type": "pageview",
+    "button_name": "signup"
+  }
 }
 ```
+
+### Index Naming Convention
+
+Events are stored in monthly indices with the format: `analytics-{site}-{year}-{month}`
+
+Examples:
+- `analytics-my-website-2025-07`
+- `analytics-blog-2025-08`
 
 ## OpenSearch Queries
 
 ### View Recent Page Views
 ```json
-GET /analytics-events/_search
+GET /analytics-my-website-2025-07/_search
 {
   "query": {
     "bool": {
       "must": [
-        { "term": { "site_id": "your-site-id" } },
-        { "term": { "event_type": "pageview" } }
+        { "term": { "site": "my-website" } },
+        { "term": { "event.type": "pageview" } }
       ]
     }
   },
-  "sort": [{ "timestamp": { "order": "desc" } }],
+  "sort": [{ "@timestamp": { "order": "desc" } }],
   "size": 100
 }
 ```
 
 ### Popular Pages
 ```json
-GET /analytics-events/_search
+GET /analytics-my-website-2025-07/_search
 {
   "query": {
     "bool": {
       "must": [
-        { "term": { "site_id": "your-site-id" } },
-        { "term": { "event_type": "pageview" } }
+        { "term": { "site": "my-website" } },
+        { "term": { "event.type": "pageview" } }
       ]
     }
   },
@@ -219,12 +213,28 @@ GET /analytics-events/_search
 
 ### Browser Statistics
 ```json
-GET /analytics-events/_search
+GET /analytics-my-website-2025-07/_search
 {
-  "query": { "term": { "site_id": "your-site-id" } },
+  "query": { "term": { "site": "my-website" } },
   "aggs": {
     "browsers": {
-      "terms": { "field": "browser" }
+      "terms": { "field": "browser.name.keyword" }
+    }
+  }
+}
+```
+
+### Operating System Distribution
+```json
+GET /analytics-my-website-2025-07/_search
+{
+  "query": { "term": { "site": "my-website" } },
+  "aggs": {
+    "operating_systems": {
+      "terms": { "field": "os.name.keyword" }
+    },
+    "mobile_vs_desktop": {
+      "terms": { "field": "os.mobile" }
     }
   }
 }
@@ -233,7 +243,6 @@ GET /analytics-events/_search
 ## Privacy Features
 
 - **No cookies**: Uses sessionStorage and localStorage for session tracking
-- **IP anonymization**: Store hashed IPs or configure IP anonymization
 - **GDPR compliant**: No personal data stored by default
 - **Self-hosted**: All data remains on your infrastructure
 - **Opt-out support**: Easy to implement user opt-out functionality
