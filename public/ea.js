@@ -49,6 +49,19 @@
     return userId
   }
 
+  function cleanupQuery (queryString) {
+    if (!queryString) return ''
+    
+    const params = new URLSearchParams(queryString)
+    const sensitiveParams = ['key', 'token', 'code', 'access_token', 'refresh_token', 'api_key', 'auth', 'password', 'secret']
+    
+    sensitiveParams.forEach(param => {
+      params.delete(param)
+    })
+    
+    return params.toString()
+  }
+
   function track (eventType = 'pageview', eventData = {}) {
     if (!shouldTrack) return
 
@@ -56,7 +69,7 @@
       site: site,
       domain: location.hostname,
       path: location.pathname,
-      query: location.search,
+      query: cleanupQuery(location.search),
       title: document.title,
       referrer: document.referrer,
       language: navigator.language,
