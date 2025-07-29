@@ -9,11 +9,12 @@
   "scripts": {
     "lint": "eslint . --fix --config .config/eslint.config.ts",
     "dev": "nuxt dev",
-    "build": "nuxt build",
+    "build": "npm run minify-script && nuxt build",
     "start": "node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "cleanup": "nuxt cleanup"
+    "cleanup": "nuxt cleanup",
+    "minify-script": "terser public/ea.js -o public/ea.min.js -c -m"
   },
   "devDependencies": {
     "@nuxt/eslint": "1.7.1",
@@ -21,6 +22,7 @@
     "@opensearch-project/opensearch": "3.5.1",
     "eslint": "9.32.0",
     "eslint-plugin-tailwindcss": "3.18.2",
-    "nuxt": "4.0.2"
+    "nuxt": "4.0.2",
+    "terser": "5.43.1"
   }
 }

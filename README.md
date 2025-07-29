@@ -81,7 +81,7 @@ npm run lint
 Add this single script tag to your website's `<head>` section:
 
 ```html
-<script src="https://your-analytics-domain.com/ea.js" data-site="your-unique-site-id" async></script>
+<script src="https://your-analytics-domain.com/ea.min.js" data-site="your-unique-site-id" async></script>
 ```
 
 Replace `your-analytics-domain.com` with your actual domain where this analytics service is hosted.

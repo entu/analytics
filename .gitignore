@@ -8,3 +8,4 @@
 *.log*
 dist
 node_modules
+public/ea.min.js

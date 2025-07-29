@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'en' },
       script: [
-        { src: '/ea.js', 'data-site': process.env.NUXT_PUBLIC_SITE, async: true }
+        { src: '/ea.min.js', 'data-site': process.env.NUXT_PUBLIC_SITE, async: true }
       ]
     }
   },
