@@ -81,8 +81,10 @@
     })
   }
 
-  // Auto-track page views
-  track()
+  // Auto-track page views with delay to allow title updates
+  setTimeout(() => {
+    track()
+  }, 100)
 
   // Track page views on navigation (for SPAs)
   let currentPath = location.pathname
@@ -91,22 +93,24 @@
 
   history.pushState = function () {
     originalPushState.apply(history, arguments)
+
     setTimeout(() => {
       if (currentPath !== location.pathname) {
         currentPath = location.pathname
         track()
       }
-    }, 0)
+    }, 100) // Small delay to allow title updates
   }
 
   history.replaceState = function () {
     originalReplaceState.apply(history, arguments)
+
     setTimeout(() => {
       if (currentPath !== location.pathname) {
         currentPath = location.pathname
         track()
       }
-    }, 0)
+    }, 100) // Small delay to allow title updates
   }
 
   window.addEventListener('popstate', () => {
@@ -115,7 +119,7 @@
         currentPath = location.pathname
         track()
       }
-    }, 0)
+    }, 100) // Small delay to allow title updates
   })
 
   // Expose tracking function globally
