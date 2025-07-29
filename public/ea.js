@@ -5,16 +5,13 @@
     const scripts = document.querySelectorAll('script[src*="ea.js"]')
     const currentScript = scripts[scripts.length - 1]
 
-    if (!currentScript) return
+    if (!currentScript) return {}
 
     const site = currentScript.getAttribute('data-site')
 
-    if (!site) return
+    if (!site) return {}
 
     const url = new URL(currentScript.src)
-
-    console.log('Analytics script loaded with site:', site)
-    console.log('Analytics script loaded with endpoint:', endpoint)
 
     return {
       site,
