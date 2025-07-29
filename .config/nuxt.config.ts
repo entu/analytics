@@ -7,7 +7,10 @@ export default defineNuxtConfig({
   ssr: false,
   app: {
     head: {
-      htmlAttrs: { lang: 'en' }
+      htmlAttrs: { lang: 'en' },
+      script: [
+        { src: '/ea.js', 'data-site': process.env.NUXT_PUBLIC_SITE, async: true }
+      ]
     }
   },
   spaLoadingTemplate: false,
@@ -15,7 +18,10 @@ export default defineNuxtConfig({
     opensearchHostname: '',
     opensearchPort: '',
     opensearchUsername: '',
-    opensearchPassword: ''
+    opensearchPassword: '',
+    public: {
+      siteId: process.env.NUXT_PUBLIC_SITE || '',
+    }
   },
   eslint: {
     config: {
