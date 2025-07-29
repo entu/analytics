@@ -70,19 +70,15 @@
       }
     }
 
-    // Send data using navigator.sendBeacon if available, fallback to fetch
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(endpoint, JSON.stringify(payload))
-    }
-    else {
-      fetch(endpoint, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch((err) => {
-        console.warn('Analytics tracking failed:', err)
-      })
-    }
+    // Send data to analytics endpoint
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    }).catch((err) => {
+      console.warn('Analytics tracking failed:', err)
+    })
   }
 
   // Auto-track page views
