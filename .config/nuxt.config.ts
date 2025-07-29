@@ -20,7 +20,7 @@ export default defineNuxtConfig({
     opensearchUsername: '',
     opensearchPassword: '',
     public: {
-      siteId: process.env.NUXT_PUBLIC_SITE || '',
+      siteId: process.env.NUXT_PUBLIC_SITE || ''
     }
   },
   eslint: {

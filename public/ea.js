@@ -13,16 +13,18 @@
 
     const url = new URL(currentScript.src)
 
+    console.log('Analytics script loaded with site:', site)
+    console.log('Analytics script loaded with endpoint:', endpoint)
+
     return {
       site,
       endpoint: `${url.protocol}//${url.host}/api/track`
     }
   }
 
-  const { endpoint, site } = getScriptConfig()
+  const { site, endpoint } = getScriptConfig()
 
   const shouldTrack = site
-    && site !== 'default'
     && endpoint
     && !location.hostname.includes('localhost')
     && !location.hostname.includes('127.0.0.1')
