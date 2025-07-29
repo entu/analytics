@@ -1,0 +1,26 @@
+{
+  "name": "entu-analytics",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Web usage analytics.",
+  "author": "Argo Roots <argo@roots.ee>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --fix --config .config/eslint.config.ts",
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "start": "node .output/server/index.mjs",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "cleanup": "nuxt cleanup"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "1.7.1",
+    "@nuxtjs/tailwindcss": "6.14.0",
+    "@opensearch-project/opensearch": "3.5.1",
+    "eslint": "9.32.0",
+    "eslint-plugin-tailwindcss": "3.18.2",
+    "nuxt": "4.0.2"
+  }
+}
