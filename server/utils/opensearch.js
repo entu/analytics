@@ -32,5 +32,5 @@ function getIndexName (site, timestamp) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
 
-  return `analytics-${site}-${year}-${month}`
+  return `analytics-${site.replaceAll('.', '-').toLowerCase()}-${year}-${month}`
 }
