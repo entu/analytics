@@ -3,7 +3,7 @@
 
   function getScriptConfig () {
     const scripts = document.querySelectorAll('script[src$="/ea.js"], script[src$="/ea.min.js"]')
-    const currentScript = scripts.at(-1)
+    const currentScript = scripts[scripts.length - 1]
 
     if (!currentScript) return {}
 
