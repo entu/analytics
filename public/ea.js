@@ -23,12 +23,15 @@
     try {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID()
-      } else if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      }
+      else if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
         return `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`
-      } else {
+      }
+      else {
         return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
       }
-    } catch (e) {
+    }
+    catch (e) {
       return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
     }
   }
@@ -57,14 +60,27 @@
 
   function cleanupQuery (queryString) {
     if (!queryString) return ''
-    
+
     const params = new URLSearchParams(queryString)
-    const sensitiveParams = ['key', 'token', 'code', 'access_token', 'refresh_token', 'api_key', 'auth', 'password', 'secret']
-    
-    sensitiveParams.forEach(param => {
+    const sensitiveParams = [
+      'access_token',
+      'api_key',
+      'auth',
+      'state',
+      'session',
+      'session_id',
+      'code',
+      'key',
+      'password',
+      'refresh_token',
+      'secret',
+      'token'
+    ]
+
+    sensitiveParams.forEach((param) => {
       params.delete(param)
     })
-    
+
     return params.toString()
   }
 
