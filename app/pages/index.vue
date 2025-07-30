@@ -33,7 +33,7 @@ useHead({
             <h3 class="mb-2 text-lg font-medium text-gray-900">
               Include the tracking script on your website
             </h3>
-            <pre class="rounded-md bg-gray-100 p-4 text-xs overflow-auto"><code>&lt;script src="{{ currentUrl }}/ea.min.js" data-site="YOUR_SITE_ID" async&gt;&lt;/script&gt;</code></pre>
+            <pre class="rounded-md bg-gray-100 p-4 text-xs overflow-auto"><code>&lt;script src="{{ currentUrl }}/ea.min.js" data-site="YOUR_SITE_ID" crossorigin="anonymous" defer&gt;&lt;/script&gt;</code></pre>
             <p class="mt-2 text-sm text-gray-600">
               * replace <code>YOUR_SITE_ID</code> with a unique identifier for your website.
             </p>
