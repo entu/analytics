@@ -19,19 +19,25 @@
     }
   }
 
-  const { site, endpoint } = getScriptConfig()
-
-  const shouldTrack = site
-    && endpoint
-    && !location.hostname.includes('localhost')
-    && !location.hostname.includes('127.0.0.1')
-    && location.hostname !== ''
+  function generateUniqueId () {
+    try {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID()
+      } else if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        return `${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`
+      } else {
+        return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+      }
+    } catch (e) {
+      return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+    }
+  }
 
   function getSessionId () {
     let sessionId = sessionStorage.getItem('ea_session')
 
     if (!sessionId) {
-      sessionId = 'session_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now()
+      sessionId = generateUniqueId()
       sessionStorage.setItem('ea_session', sessionId)
     }
 
@@ -42,7 +48,7 @@
     let userId = localStorage.getItem('ea_user')
 
     if (!userId) {
-      userId = 'user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now()
+      userId = generateUniqueId()
       localStorage.setItem('ea_user', userId)
     }
 
@@ -93,6 +99,14 @@
       console.warn('Analytics tracking failed:', err)
     })
   }
+
+  const { site, endpoint } = getScriptConfig()
+
+  const shouldTrack = site
+    && endpoint
+    && !location.hostname.includes('localhost')
+    && !location.hostname.includes('127.0.0.1')
+    && location.hostname !== ''
 
   // Auto-track page views with delay to allow title updates
   setTimeout(() => {
