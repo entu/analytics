@@ -5,20 +5,20 @@ function parseUserAgent (userAgent) {
 
   // OS detection
   if (userAgent.includes('Windows NT')) {
-    osMatch = ['', 'Windows', userAgent.match(/Windows NT (\d+\.\d+)/)?.[1]]
+    osMatch = ['', 'Windows', userAgent.match(/Windows NT (\d+\.\d+)/)?.at(1)]
   }
   else if (userAgent.includes('Mac OS X')) {
-    osMatch = ['', 'macOS', userAgent.match(/Mac OS X (\d+_\d+)/)?.[1]?.replace('_', '.')]
+    osMatch = ['', 'macOS', userAgent.match(/Mac OS X (\d+_\d+)/)?.at(1)?.replace('_', '.')]
   }
   else if (userAgent.includes('Linux')) {
     osMatch = ['', 'Linux', '']
   }
   else if (userAgent.includes('Android')) {
-    osMatch = ['', 'Android', userAgent.match(/Android (\d+\.\d+)/)?.[1]]
+    osMatch = ['', 'Android', userAgent.match(/Android (\d+\.\d+)/)?.at(1)]
     deviceType = 'Mobile'
   }
   else if (userAgent.includes('iOS')) {
-    osMatch = ['', 'iOS', userAgent.match(/OS (\d+_\d+)/)?.[1]?.replace('_', '.')]
+    osMatch = ['', 'iOS', userAgent.match(/OS (\d+_\d+)/)?.at(1)?.replace('_', '.')]
     deviceType = 'Mobile'
   }
 
@@ -31,10 +31,10 @@ function parseUserAgent (userAgent) {
   }
 
   return {
-    browser: browserMatch?.[1] || 'Unknown',
-    browserVersion: browserMatch?.[2] || 'Unknown',
-    os: osMatch?.[1] || 'Unknown',
-    osVersion: osMatch?.[2] || 'Unknown',
+    browser: browserMatch?.at(1),
+    browserVersion: browserMatch?.at(2),
+    os: osMatch?.at(1),
+    osVersion: osMatch?.at(2),
     deviceType
   }
 }
@@ -68,14 +68,14 @@ export default defineEventHandler(async (event) => {
     os: {
       name: agent.os,
       version: agent.osVersion,
-      mobile: agent.deviceType === 'Mobile'
+      type: agent.deviceType
     },
-    ip: clientIP,
     screen: body.screen,
     viewport: body.viewport,
     language: body.language,
-    session: body.session,
+    ip: clientIP,
     user: body.user,
+    session: body.session,
     event: body.event || {}
   })
 
