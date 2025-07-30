@@ -23,6 +23,7 @@
     "eslint": "9.32.0",
     "eslint-plugin-tailwindcss": "3.18.2",
     "nuxt": "4.0.2",
-    "terser": "5.43.1"
+    "terser": "5.43.1",
+    "ua-parser-js": "2.0.4"
   }
 }
