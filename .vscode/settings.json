@@ -3,11 +3,11 @@
     "source.fixAll.eslint": "explicit"
   },
   "eslint.options": {
-    "overrideConfigFile": "./.config/eslint.config.js"
+    "overrideConfigFile": "./.config/eslint.config.ts"
   },
   "eslint.validate": [
     "javascript",
-    "typecript",
+    "typescript",
     "vue"
   ]
 }
