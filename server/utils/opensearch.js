@@ -1,10 +1,10 @@
 import { Client } from '@opensearch-project/opensearch'
 
+const { opensearchHostname, opensearchPort, opensearchUsername, opensearchPassword } = useRuntimeConfig()
 let dbConnection
 
 export async function connectOpenSearchDb () {
   if (!dbConnection) {
-    const { opensearchHostname, opensearchPort, opensearchUsername, opensearchPassword } = useRuntimeConfig()
     dbConnection = new Client({
       node: `https://${opensearchHostname}:${opensearchPort}`,
       auth: {

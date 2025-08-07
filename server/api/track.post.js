@@ -56,134 +56,67 @@ async function getIPLocation (ip) {
   const dbPath = './IP2LOCATION.BIN'
 
   if (!existsSync(dbPath)) {
-    console.log('IP2Location database not found, downloading...')
-
     const downloaded = await downloadIP2LocationDB(dbPath)
-
     if (!downloaded) return {}
   }
 
-  await ip2location.openAsync(dbPath)
+  try {
+    await ip2location.openAsync(dbPath)
 
-  const { countryLong, region, city } = ip2location.getAll(ip)
+    const { countryLong, region, city } = ip2location.getAll(ip)
 
-  return {
-    country: countryLong,
-    region: region,
-    city: city
+    return {
+      country: countryLong,
+      region: region,
+      city: city
+    }
+  }
+  finally {
+    // Properly close the IP2Location instance to prevent file descriptor leaks
+    if (ip2location.close) {
+      ip2location.close()
+    }
   }
 }
 
 async function downloadIP2LocationDB (dbPath) {
-  if (!ip2locationToken) {
-    console.error('IP2Location token is not configured, skipping database download')
-
-    return false
-  }
-
   const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
   const zipPath = `${dbPath}.zip`
 
   try {
     const response = await fetch(downloadUrl)
-
     if (!response.ok) {
-      console.error(`Failed to download IP2Location database: ${response.status} ${response.statusText}`)
-
+      console.error(`Failed to download IP2Location database: ${response.status}`)
       return false
     }
 
-    // Save ZIP file to disk first
     const buffer = await response.arrayBuffer()
     const zipBuffer = Buffer.from(buffer)
 
-    // Check if the response is actually a ZIP file
-    const zipMagicBytes = zipBuffer.slice(0, 4)
-    const isZipFile = zipMagicBytes[0] === 0x50 && zipMagicBytes[1] === 0x4B
-      && (zipMagicBytes[2] === 0x03 || zipMagicBytes[2] === 0x05 || zipMagicBytes[2] === 0x07)
-
-    if (!isZipFile) {
-      console.error('Downloaded file is not a valid ZIP file')
-      console.log('First 100 bytes as string:', zipBuffer.slice(0, 100).toString('utf8'))
-      return false
-    }
-
     await writeFile(zipPath, zipBuffer)
-    console.log(`Downloaded ZIP file (${zipBuffer.length} bytes) saved to ${zipPath}`)
 
-    // Extract from the saved ZIP file
-    let zipDirectory
-    try {
-      zipDirectory = await Open.file(zipPath)
-    }
-    catch (zipError) {
-      console.error('Failed to open ZIP file:', zipError)
-      // Clean up the corrupted ZIP file
-      try {
-        await unlink(zipPath)
-      }
-      catch (unlinkError) {
-        console.error('Failed to clean up ZIP file:', unlinkError)
-      }
-      return false
-    }
-
-    // Find the BIN file in the ZIP archive
+    const zipDirectory = await Open.file(zipPath)
     const dataFile = zipDirectory.files.find((file) => file.path.toLowerCase().endsWith('.bin'))
 
     if (!dataFile) {
-      console.error('No .BIN file found in the ZIP archive')
-      console.log('Available files:', zipDirectory.files.map((f) => f.path))
-      // Clean up the ZIP file
-      try {
-        await unlink(zipPath)
-      }
-      catch (unlinkError) {
-        console.error('Failed to clean up ZIP file:', unlinkError)
-      }
+      console.error('No .BIN file found in ZIP archive')
+
       return false
     }
 
-    console.log(`Found database file: ${dataFile.path}`)
+    await new Promise((resolve, reject) => {
+      const writeStream = createWriteStream(dbPath)
+      dataFile
+        .stream()
+        .pipe(writeStream)
+        .on('error', reject)
+        .on('finish', resolve)
+    })
 
-    try {
-      await new Promise((resolve, reject) => {
-        const writeStream = createWriteStream(dbPath)
-        dataFile
-          .stream()
-          .pipe(writeStream)
-          .on('error', reject)
-          .on('finish', resolve)
-      })
-
-      console.log(`IP2Location database saved to ${dbPath}`)
-
-      // Clean up the ZIP file after successful extraction
-      try {
-        await unlink(zipPath)
-        console.log('ZIP file cleaned up')
-      }
-      catch (unlinkError) {
-        console.error('Failed to clean up ZIP file:', unlinkError)
-      }
-
-      return true
-    }
-    catch (extractError) {
-      console.error('Failed to extract database file:', extractError)
-      // Clean up partial files
-      try {
-        await unlink(zipPath)
-      }
-      catch (unlinkError) {
-        console.error('Failed to clean up ZIP file:', unlinkError)
-      }
-      return false
-    }
+    return true
   }
   catch (error) {
-    console.error('Failed to download IP2Location database:', error)
-
+    console.error('Failed to download IP2Location database:', error.message)
     return false
   }
 }
