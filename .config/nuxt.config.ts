@@ -19,8 +19,9 @@ export default defineNuxtConfig({
     opensearchPort: '',
     opensearchUsername: '',
     opensearchPassword: '',
+    ip2locationToken: '',
     public: {
-      siteId: process.env.NUXT_PUBLIC_SITE || ''
+      site: ''
     }
   },
   eslint: {
