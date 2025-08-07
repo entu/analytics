@@ -64,14 +64,11 @@ useHead({
               <li>User language</li>
               <li>Session tracking</li>
               <li>Anonymous user tracking</li>
+              <li>We use the IP2Location LITE database for <a href="https://lite.ip2location.com">IP geolocation</a></li>
             </ul>
           </div>
         </div>
       </div>
-
-      <p class="mt-4 text-center text-xs text-gray-300">
-        We use the IP2Location LITE database for <a href="https://lite.ip2location.com">IP geolocation</a>
-      </p>
     </div>
   </div>
 </template>
