@@ -4,6 +4,8 @@ import { existsSync, createWriteStream } from 'fs'
 import { writeFile, unlink } from 'fs/promises'
 import { Open } from 'unzipper'
 
+const { ip2locationToken } = useRuntimeConfig()
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const userAgent = getHeader(event, 'user-agent')
@@ -73,7 +75,12 @@ async function getIPLocation (ip) {
 }
 
 async function downloadIP2LocationDB (dbPath) {
-  const { ip2locationToken } = useRuntimeConfig()
+  if (!ip2locationToken) {
+    console.error('IP2Location token is not configured, skipping database download')
+
+    return false
+  }
+
   const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
   const zipPath = `${dbPath}.zip`
 
