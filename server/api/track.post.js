@@ -1,10 +1,10 @@
 import { UAParser } from 'ua-parser-js'
 import { IP2Location } from 'ip2location-nodejs'
 import { existsSync, createWriteStream } from 'fs'
-import { writeFile, unlink } from 'fs/promises'
+import { writeFile } from 'fs/promises'
 import { Open } from 'unzipper'
 
-const { ip2locationToken } = useRuntimeConfig()
+let ip2location
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -52,7 +52,6 @@ export default defineEventHandler(async (event) => {
 async function getIPLocation (ip) {
   if (!ip || ip === '127.0.0.1' || ip === '::1') return {}
 
-  const ip2location = new IP2Location()
   const dbPath = './IP2LOCATION.BIN'
 
   if (!existsSync(dbPath)) {
@@ -61,7 +60,10 @@ async function getIPLocation (ip) {
   }
 
   try {
-    await ip2location.openAsync(dbPath)
+    if (!ip2location) {
+      ip2location = new IP2Location()
+      await ip2location.openAsync(dbPath)
+    }
 
     const { countryLong, region, city } = ip2location.getAll(ip)
 
@@ -71,16 +73,18 @@ async function getIPLocation (ip) {
       city: city
     }
   }
-  finally {
-    // Properly close the IP2Location instance to prevent file descriptor leaks
-    if (ip2location.close) {
-      ip2location.close()
-    }
+  catch (error) {
+    console.error('Failed to get IP location:', error.message)
+
+    return {}
   }
 }
 
 async function downloadIP2LocationDB (dbPath) {
-  const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
+  const { ip2locationToken } = useRuntimeConfig()
+
+  // const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
+  const downloadUrl = `https://swpublisher.entu.eu/IP2LOCATION-LITE-DB3.IPV6.BIN.zip`
   const zipPath = `${dbPath}.zip`
 
   try {
