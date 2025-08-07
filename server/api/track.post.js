@@ -89,6 +89,18 @@ async function downloadIP2LocationDB (dbPath) {
     // Save ZIP file to disk first
     const buffer = await response.arrayBuffer()
     const zipBuffer = Buffer.from(buffer)
+
+    // Check if the response is actually a ZIP file
+    const zipMagicBytes = zipBuffer.slice(0, 4)
+    const isZipFile = zipMagicBytes[0] === 0x50 && zipMagicBytes[1] === 0x4B
+      && (zipMagicBytes[2] === 0x03 || zipMagicBytes[2] === 0x05 || zipMagicBytes[2] === 0x07)
+
+    if (!isZipFile) {
+      console.error('Downloaded file is not a valid ZIP file')
+      console.log('First 100 bytes as string:', zipBuffer.slice(0, 100).toString('utf8'))
+      return false
+    }
+
     await writeFile(zipPath, zipBuffer)
     console.log(`Downloaded ZIP file (${zipBuffer.length} bytes) saved to ${zipPath}`)
 
