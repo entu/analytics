@@ -1,7 +1,7 @@
 import { UAParser } from 'ua-parser-js'
 import { IP2Location } from 'ip2location-nodejs'
-import { existsSync } from 'fs'
-import { createWriteStream, writeFile } from 'fs/promises'
+import { existsSync, createWriteStream } from 'fs'
+import { writeFile } from 'fs/promises'
 import { Open } from 'unzipper'
 
 export default defineEventHandler(async (event) => {
