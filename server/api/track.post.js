@@ -1,7 +1,7 @@
 import { UAParser } from 'ua-parser-js'
 import { IP2Location } from 'ip2location-nodejs'
 import { existsSync } from 'fs'
-import { writeFile } from 'fs/promises'
+import { createWriteStream, writeFile } from 'fs/promises'
 import { Open } from 'unzipper'
 
 export default defineEventHandler(async (event) => {
@@ -75,31 +75,53 @@ async function getIPLocation (ip) {
 async function downloadIP2LocationDB (dbPath) {
   const { ip2locationToken } = useRuntimeConfig()
   const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
+  const zipPath = `${dbPath}.zip`
 
   try {
     const response = await fetch(downloadUrl)
 
     if (!response.ok) {
       console.error(`Failed to download IP2Location database: ${response.status} ${response.statusText}`)
+
       return false
     }
 
+    // Save ZIP file to disk first
     const buffer = await response.arrayBuffer()
-    const zipDirectory = await Open.buffer(Buffer.from(buffer))
-    const dataFile = zipDirectory.files.find((file) => file.path.endsWith('.BIN') || file.path.endsWith('.bin'))
+    const zipBuffer = Buffer.from(buffer)
+    await writeFile(zipPath, zipBuffer)
+    console.log(`Downloaded ZIP file (${zipBuffer.length} bytes) saved to ${zipPath}`)
+
+    // Extract from the saved ZIP file
+    const zipDirectory = await Open.file(zipPath)
+
+    // Find the BIN file in the ZIP archive
+    const dataFile = zipDirectory.files.find((file) => file.path.toLowerCase().endsWith('.bin'))
 
     if (!dataFile) {
       console.error('No .BIN file found in the ZIP archive')
+      console.log('Available files:', zipDirectory.files.map((f) => f.path))
+
       return false
     }
 
-    const content = await dataFile.buffer()
-    await writeFile(dbPath, content)
+    console.log(`Found database file: ${dataFile.path}`)
+
+    await new Promise((resolve, reject) => {
+      dataFile
+        .stream()
+        .pipe(createWriteStream(dbPath))
+        .on('error', reject)
+        .on('finish', resolve)
+    })
+
+    console.log(`IP2Location database saved to ${dbPath}`)
 
     return true
   }
   catch (error) {
     console.error('Failed to download IP2Location database:', error)
+
     return false
   }
 }
