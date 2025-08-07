@@ -1,7 +1,7 @@
 import { UAParser } from 'ua-parser-js'
 import { IP2Location } from 'ip2location-nodejs'
 import { existsSync, createWriteStream } from 'fs'
-import { writeFile } from 'fs/promises'
+import { writeFile, unlink } from 'fs/promises'
 import { Open } from 'unzipper'
 
 export default defineEventHandler(async (event) => {
@@ -93,7 +93,21 @@ async function downloadIP2LocationDB (dbPath) {
     console.log(`Downloaded ZIP file (${zipBuffer.length} bytes) saved to ${zipPath}`)
 
     // Extract from the saved ZIP file
-    const zipDirectory = await Open.file(zipPath)
+    let zipDirectory
+    try {
+      zipDirectory = await Open.file(zipPath)
+    }
+    catch (zipError) {
+      console.error('Failed to open ZIP file:', zipError)
+      // Clean up the corrupted ZIP file
+      try {
+        await unlink(zipPath)
+      }
+      catch (unlinkError) {
+        console.error('Failed to clean up ZIP file:', unlinkError)
+      }
+      return false
+    }
 
     // Find the BIN file in the ZIP archive
     const dataFile = zipDirectory.files.find((file) => file.path.toLowerCase().endsWith('.bin'))
@@ -101,23 +115,52 @@ async function downloadIP2LocationDB (dbPath) {
     if (!dataFile) {
       console.error('No .BIN file found in the ZIP archive')
       console.log('Available files:', zipDirectory.files.map((f) => f.path))
-
+      // Clean up the ZIP file
+      try {
+        await unlink(zipPath)
+      }
+      catch (unlinkError) {
+        console.error('Failed to clean up ZIP file:', unlinkError)
+      }
       return false
     }
 
     console.log(`Found database file: ${dataFile.path}`)
 
-    await new Promise((resolve, reject) => {
-      dataFile
-        .stream()
-        .pipe(createWriteStream(dbPath))
-        .on('error', reject)
-        .on('finish', resolve)
-    })
+    try {
+      await new Promise((resolve, reject) => {
+        const writeStream = createWriteStream(dbPath)
+        dataFile
+          .stream()
+          .pipe(writeStream)
+          .on('error', reject)
+          .on('finish', resolve)
+      })
 
-    console.log(`IP2Location database saved to ${dbPath}`)
+      console.log(`IP2Location database saved to ${dbPath}`)
 
-    return true
+      // Clean up the ZIP file after successful extraction
+      try {
+        await unlink(zipPath)
+        console.log('ZIP file cleaned up')
+      }
+      catch (unlinkError) {
+        console.error('Failed to clean up ZIP file:', unlinkError)
+      }
+
+      return true
+    }
+    catch (extractError) {
+      console.error('Failed to extract database file:', extractError)
+      // Clean up partial files
+      try {
+        await unlink(zipPath)
+      }
+      catch (unlinkError) {
+        console.error('Failed to clean up ZIP file:', unlinkError)
+      }
+      return false
+    }
   }
   catch (error) {
     console.error('Failed to download IP2Location database:', error)
