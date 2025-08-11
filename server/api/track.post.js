@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     country: location.country || undefined,
     region: location.region || undefined,
     city: location.city || undefined,
-    ua: agent.ua || undefined,
+    ua: userAgent || undefined,
     device: agent.device || undefined,
     cpu: agent.cpu || undefined,
     os: agent.os || undefined,
