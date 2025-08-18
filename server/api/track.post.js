@@ -83,8 +83,8 @@ async function getIPLocation (ip) {
 async function downloadIP2LocationDB (dbPath) {
   const { ip2locationToken } = useRuntimeConfig()
 
-  // const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
-  const downloadUrl = `https://swpublisher.entu.eu/IP2LOCATION-LITE-DB3.IPV6.BIN.zip`
+  const downloadUrl = `https://www.ip2location.com/download/?token=${ip2locationToken}&file=DB3LITEBINIPV6`
+  // const downloadUrl = `https://swpublisher.entu.eu/IP2LOCATION-LITE-DB3.IPV6.BIN.zip`
   const zipPath = `${dbPath}.zip`
 
   try {
