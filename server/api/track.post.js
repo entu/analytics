@@ -117,6 +117,8 @@ async function downloadIP2LocationDB (dbPath) {
         .on('finish', resolve)
     })
 
+    console.log('IP2Location database downloaded and extracted successfully')
+
     return true
   }
   catch (error) {
