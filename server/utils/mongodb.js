@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 
 let dbConnection
 
@@ -13,6 +13,15 @@ export async function connectMongoDb () {
   }
 
   return dbConnection
+}
+
+export function objectId (id) {
+  try {
+    return new ObjectId(id)
+  }
+  catch (error) {
+    throw new Error('Invalid ObjectId')
+  }
 }
 
 export async function insertDocument (body) {
