@@ -1,14 +1,17 @@
 <script setup>
 const route = useRoute()
-const site = computed(() => route.params.site || '')
-const days = ref(parseInt(route.query.days) || 7)
+
+const days = ref(parseInt(route.query.days) || 1)
 const stats = ref(null)
 const loading = ref(false)
 const error = ref(null)
 const activeChart = ref('pageviews')
 
+const site = computed(() => route.params.site || '')
+
 const chartData = computed(() => {
   if (!stats.value) return []
+  
   switch (activeChart.value) {
     case 'events': return stats.value.dailyEvents
     case 'visitors': return stats.value.dailyVisitors
