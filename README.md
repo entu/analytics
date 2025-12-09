@@ -1,6 +1,6 @@
 # Entu Analytics
 
-A privacy-focused, self-hosted web analytics platform built with Nuxt.js and OpenSearch.
+A privacy-focused, self-hosted web analytics platform built with Nuxt.js and MongoDB.
 
 ## Features
 
@@ -33,25 +33,15 @@ Track any custom events like button clicks, form submissions, downloads, etc.
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm
-- OpenSearch instance running (local or remote)
+- Node.js 22+ and npm
+- MongoDB instance running (local or remote)
 
 ### 1. Environment Setup
 
-Copy the example environment file and configure your OpenSearch connection:
+Copy the example environment file and configure your MongoDB connection:
 
 ```bash
 cp .env.example .env
-```
-
-Then edit `.env` with your OpenSearch configuration:
-
-```bash
-# OpenSearch Configuration
-NUXT_OPENSEARCH_HOSTNAME=localhost
-NUXT_OPENSEARCH_PORT=9200
-NUXT_OPENSEARCH_USERNAME=admin
-NUXT_OPENSEARCH_PASSWORD=admin
 ```
 
 ### 2. Start the Development Server
@@ -127,11 +117,11 @@ Receives and stores analytics events.
 
 ## Data Structure
 
-Each analytics event stored in OpenSearch contains:
+Each analytics event stored in MongoDB contains:
 
 ```json
 {
-  "@timestamp": "2025-07-29T10:30:00.000Z",
+  "date": "2025-07-29T10:30:00.000Z",
   "site": "my-website",
   "domain": "example.com",
   "path": "/page",
@@ -168,77 +158,6 @@ Events are stored in monthly indices with the format: `analytics-{site}-{year}-{
 Examples:
 - `analytics-my-website-2025-07`
 - `analytics-blog-2025-08`
-
-## OpenSearch Queries
-
-### View Recent Page Views
-```json
-GET /analytics-my-website-2025-07/_search
-{
-  "query": {
-    "bool": {
-      "must": [
-        { "term": { "site": "my-website" } },
-        { "term": { "event.type": "pageview" } }
-      ]
-    }
-  },
-  "sort": [{ "@timestamp": { "order": "desc" } }],
-  "size": 100
-}
-```
-
-### Popular Pages
-```json
-GET /analytics-my-website-2025-07/_search
-{
-  "query": {
-    "bool": {
-      "must": [
-        { "term": { "site": "my-website" } },
-        { "term": { "event.type": "pageview" } }
-      ]
-    }
-  },
-  "aggs": {
-    "popular_pages": {
-      "terms": {
-        "field": "path.keyword",
-        "size": 10
-      }
-    }
-  }
-}
-```
-
-### Browser Statistics
-```json
-GET /analytics-my-website-2025-07/_search
-{
-  "query": { "term": { "site": "my-website" } },
-  "aggs": {
-    "browsers": {
-      "terms": { "field": "browser.name.keyword" }
-    }
-  }
-}
-```
-
-### Operating System Distribution
-```json
-GET /analytics-my-website-2025-07/_search
-{
-  "query": { "term": { "site": "my-website" } },
-  "aggs": {
-    "operating_systems": {
-      "terms": { "field": "os.name.keyword" }
-    },
-    "mobile_vs_desktop": {
-      "terms": { "field": "os.mobile" }
-    }
-  }
-}
-```
 
 ## Privacy Features
 

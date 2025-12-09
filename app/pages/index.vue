@@ -10,7 +10,7 @@ const currentUrl = computed(() => {
 useHead({
   title: 'Entu Analytics - Privacy-focused Web Analytics',
   meta: [
-    { name: 'description', content: 'Self-hosted web analytics solution with OpenSearch backend' }
+    { name: 'description', content: 'Self-hosted web analytics solution with MongoDB backend' }
   ]
 })
 </script>
