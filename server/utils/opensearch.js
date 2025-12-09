@@ -1,33 +1,28 @@
-import { Client } from '@opensearch-project/opensearch'
+import { MongoClient } from 'mongodb'
 
-const { opensearchHostname, opensearchPort, opensearchUsername, opensearchPassword } = useRuntimeConfig()
+const { mongodbUri } = useRuntimeConfig()
 let dbConnection
 
-export async function connectOpenSearchDb () {
+export async function connectMongoDb () {
   if (!dbConnection) {
-    dbConnection = new Client({
-      node: `https://${opensearchHostname}:${opensearchPort}`,
-      auth: {
-        username: opensearchUsername,
-        password: opensearchPassword
-      }
-    })
+    const client = new MongoClient(mongodbUri)
+    await client.connect()
+    dbConnection = client.db()
   }
 
   return dbConnection
 }
 
-export async function indexOpenSearchDb (body) {
-  const client = await connectOpenSearchDb()
-  const response = await client.index({
-    index: getIndexName(body.site, body['@timestamp']),
-    body
-  })
+export async function insertDocument (body) {
+  const db = await connectMongoDb()
+  const collectionName = getCollectionName(body.site, body['@timestamp'])
+  const collection = db.collection(collectionName)
+  const response = await collection.insertOne(body)
 
   return response
 }
 
-function getIndexName (site, timestamp) {
+function getCollectionName (site, timestamp) {
   const date = new Date(timestamp)
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')

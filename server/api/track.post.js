@@ -20,8 +20,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await indexOpenSearchDb({
-    '@timestamp': new Date().toISOString(),
+  await insertDocument({
+    date: new Date(),
     site: body.site,
     domain: body.domain || undefined,
     path: body.path || undefined,

@@ -18,15 +18,15 @@
     "minify-script": "terser public/ea.js -o public/ea.min.js -c -m"
   },
   "devDependencies": {
-    "@nuxt/eslint": "1.8.0",
+    "@nuxt/eslint": "1.11.0",
     "@nuxtjs/tailwindcss": "6.14.0",
-    "@opensearch-project/opensearch": "3.5.1",
-    "eslint": "9.32.0",
+    "mongodb": "7.0.0",
+    "eslint": "9.39.1",
     "eslint-plugin-tailwindcss": "3.18.2",
-    "ip2location-nodejs": "9.6.3",
-    "nuxt": "4.0.3",
-    "terser": "5.43.1",
-    "ua-parser-js": "2.0.4",
+    "ip2location-nodejs": "9.7.0",
+    "nuxt": "4.2.1",
+    "terser": "5.44.1",
+    "ua-parser-js": "2.0.7",
     "unzipper": "0.12.3"
   }
 }

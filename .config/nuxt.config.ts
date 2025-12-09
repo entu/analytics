@@ -15,10 +15,8 @@ export default defineNuxtConfig({
   },
   spaLoadingTemplate: false,
   runtimeConfig: {
-    opensearchHostname: '',
-    opensearchPort: '',
-    opensearchUsername: '',
-    opensearchPassword: '',
+    mongodbUrl: '',
+    mongodbDb: '',
     ip2locationToken: '',
     public: {
       site: ''
