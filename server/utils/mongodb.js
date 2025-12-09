@@ -1,14 +1,14 @@
 import { MongoClient } from 'mongodb'
 
-const { mongodbUrl, mongodbDb } = useRuntimeConfig()
 let dbConnection
 
 export async function connectMongoDb () {
   if (!dbConnection) {
-    const client = new MongoClient(mongodbUrl)
+    const { mongodbUrl, mongodbDb } = useRuntimeConfig()
+    const dbClient = new MongoClient(mongodbUrl)
 
-    await client.connect()
-    dbConnection = client.db(mongodbDb)
+    await dbClient.connect()
+    dbConnection = dbClient.db(mongodbDb)
   }
 
   return dbConnection
