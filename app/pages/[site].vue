@@ -59,7 +59,7 @@ async function fetchStats () {
 
 watch(days, () => {
   if (site.value) {
-    navigateTo({ query: { site: site.value, days: days.value } }, { replace: true })
+    navigateTo({ query: { days: days.value } }, { replace: true })
     fetchStats()
   }
 })
