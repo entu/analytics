@@ -12,13 +12,13 @@ defineProps({
 </script>
 
 <template>
-  <div class="rounded-lg bg-white p-4">
+  <div class="flex h-full flex-col rounded-lg bg-white p-4">
     <h3 class="mb-4 text-lg font-medium text-gray-900">
       {{ title }}
     </h3>
     <div
       v-if="items.length === 0"
-      class="text-gray-500"
+      class="flex flex-1 items-center justify-center text-gray-300"
     >
       No data
     </div>

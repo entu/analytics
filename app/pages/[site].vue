@@ -11,7 +11,7 @@ const site = computed(() => route.params.site || '')
 
 const chartData = computed(() => {
   if (!stats.value) return []
-  
+
   switch (activeChart.value) {
     case 'events': return stats.value.dailyEvents
     case 'visitors': return stats.value.dailyVisitors
@@ -148,24 +148,28 @@ useHead({
           :value="stats.totalPageviews"
           :active="activeChart === 'pageviews'"
           @hover="activeChart = 'pageviews'"
+          @click="activeChart = 'pageviews'"
         />
         <stat-card
           label="Events"
           :value="stats.totalEvents"
           :active="activeChart === 'events'"
           @hover="activeChart = 'events'"
+          @click="activeChart = 'events'"
         />
         <stat-card
           label="Visitors"
           :value="stats.totalVisitors"
           :active="activeChart === 'visitors'"
           @hover="activeChart = 'visitors'"
+          @click="activeChart = 'visitors'"
         />
         <stat-card
           label="Sessions"
           :value="stats.totalSessions"
           :active="activeChart === 'sessions'"
           @hover="activeChart = 'sessions'"
+          @click="activeChart = 'sessions'"
         />
       </div>
 
@@ -211,7 +215,7 @@ useHead({
         </h3>
         <div
           v-if="stats.recentPageviews.length === 0"
-          class="text-slate-500"
+          class="flex items-center justify-center py-8 text-slate-300"
         >
           No data
         </div>

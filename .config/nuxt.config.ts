@@ -22,16 +22,6 @@ export default defineNuxtConfig({
       site: ''
     }
   },
-  eslint: {
-    config: {
-      autoInit: false,
-      stylistic: true
-    }
-  },
-  tailwindcss: {
-    cssPath: './app/assets/tailwind.css',
-    configPath: './.config/tailwind.config.ts'
-  },
   nitro: {
     routeRules: {
       '/ea.js': {
@@ -59,5 +49,15 @@ export default defineNuxtConfig({
         }
       }
     }
+  },
+  eslint: {
+    config: {
+      autoInit: false,
+      stylistic: true
+    }
+  },
+  tailwindcss: {
+    cssPath: './app/assets/tailwind.css',
+    configPath: './.config/tailwind.config.ts'
   }
 })
