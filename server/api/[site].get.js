@@ -26,34 +26,15 @@ export default defineEventHandler(async (event) => {
   const eventFilter = { ...dateFilter, 'event.type': { $ne: 'pageview' } }
 
   // Determine time slot granularity based on period
-  // 1 day = hourly, 7 days = 6-hour slots, 30/90 days = daily, 365 days = weekly
+  // 1-7 days = hourly, 30/90 days = daily, 365 days = weekly
   const getDateGroupExpression = () => {
-    if (days === 1) {
+    if (days <= 7) {
       // Hourly: %Y-%m-%dT%H:00:00.000Z
       return {
         $dateToString: {
           format: '%Y-%m-%dT%H:00:00.000Z',
           date: '$date'
         }
-      }
-    }
-    else if (days <= 7) {
-      // 6-hour slots: floor hour to nearest 6-hour block
-      return {
-        $concat: [
-          { $dateToString: { format: '%Y-%m-%dT', date: '$date' } },
-          {
-            $switch: {
-              branches: [
-                { case: { $lt: [{ $hour: '$date' }, 6] }, then: '00' },
-                { case: { $lt: [{ $hour: '$date' }, 12] }, then: '06' },
-                { case: { $lt: [{ $hour: '$date' }, 18] }, then: '12' }
-              ],
-              default: '18'
-            }
-          },
-          ':00:00.000Z'
-        ]
       }
     }
     else if (days <= 90) {
@@ -241,32 +222,15 @@ export default defineEventHandler(async (event) => {
     const result = []
     const now = new Date()
 
-    if (days === 1) {
-      // Hourly slots for 24 hours
+    if (days <= 7) {
+      // Hourly slots
       const interval = 60 * 60 * 1000 // 1 hour
-      for (let i = 23; i >= 0; i--) {
+      const slots = days * 24
+      for (let i = slots - 1; i >= 0; i--) {
         const slotDate = new Date(now.getTime() - i * interval)
         slotDate.setUTCMinutes(0, 0, 0)
         const key = slotDate.toISOString().slice(0, 13) + ':00:00.000Z'
         result.push({ date: key, count: dataMap.get(key) || 0 })
-      }
-    }
-    else if (days <= 7) {
-      // 6-hour slots
-      const interval = 6 * 60 * 60 * 1000 // 6 hours
-      const slots = Math.ceil((days * 24) / 6)
-      for (let i = slots - 1; i >= 0; i--) {
-        const slotDate = new Date(now.getTime() - i * interval)
-        // Round down to nearest 6-hour block
-        const hour = slotDate.getUTCHours()
-        const roundedHour = Math.floor(hour / 6) * 6
-        slotDate.setUTCHours(roundedHour, 0, 0, 0)
-        const hourStr = roundedHour.toString().padStart(2, '0')
-        const key = slotDate.toISOString().slice(0, 11) + hourStr + ':00:00.000Z'
-        // Avoid duplicates from rounding
-        if (result.length === 0 || result[result.length - 1].date !== key) {
-          result.push({ date: key, count: dataMap.get(key) || 0 })
-        }
       }
     }
     else if (days <= 90) {
