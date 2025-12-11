@@ -9,7 +9,7 @@ let ip2location
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const userAgent = getHeader(event, 'user-agent')
-  const clientIP = getRequestIP(event, { xForwardedFor: true })
+  const clientIP = body.ip || getRequestIP(event, { xForwardedFor: true })
   const agent = UAParser(userAgent)
   const location = await getIPLocation(clientIP)
 
