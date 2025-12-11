@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
 
   // Check if site exists
   const site = await db.collection('sites').findOne({ _id: objectId(siteId) }, { projection: { name: true, collection: true } })
+
   if (!site) {
     return {}
   }
@@ -26,15 +27,33 @@ export default defineEventHandler(async (event) => {
   const eventFilter = { ...dateFilter, 'event.type': { $ne: 'pageview' } }
 
   // Determine time slot granularity based on period
-  // 1-7 days = hourly, 30/90 days = daily, 365 days = weekly
   const getDateGroupExpression = () => {
-    if (days <= 7) {
+    if (days === 1) {
       // Hourly: %Y-%m-%dT%H:00:00.000Z
       return {
         $dateToString: {
           format: '%Y-%m-%dT%H:00:00.000Z',
           date: '$date'
         }
+      }
+    }
+    else if (days <= 7) {
+      // 6-hour slots: floor hour to nearest 6-hour block
+      return {
+        $concat: [
+          { $dateToString: { format: '%Y-%m-%dT', date: '$date' } },
+          {
+            $switch: {
+              branches: [
+                { case: { $lt: [{ $hour: '$date' }, 6] }, then: '00' },
+                { case: { $lt: [{ $hour: '$date' }, 12] }, then: '06' },
+                { case: { $lt: [{ $hour: '$date' }, 18] }, then: '12' }
+              ],
+              default: '18'
+            }
+          },
+          ':00:00.000Z'
+        ]
       }
     }
     else if (days <= 90) {
@@ -222,10 +241,11 @@ export default defineEventHandler(async (event) => {
     const result = []
     const now = new Date()
 
-    if (days <= 7) {
+    if (days === 1) {
       // Hourly slots
       const interval = 60 * 60 * 1000 // 1 hour
       const slots = days * 24
+
       for (let i = slots - 1; i >= 0; i--) {
         const slotDate = new Date(now.getTime() - i * interval)
         slotDate.setUTCMinutes(0, 0, 0)
@@ -233,9 +253,29 @@ export default defineEventHandler(async (event) => {
         result.push({ date: key, count: dataMap.get(key) || 0 })
       }
     }
+    else if (days <= 7) {
+      // 6-hour slots
+      const interval = 6 * 60 * 60 * 1000 // 6 hours
+      const slots = Math.ceil((days * 24) / 6)
+
+      for (let i = slots - 1; i >= 0; i--) {
+        const slotDate = new Date(now.getTime() - i * interval)
+        // Round down to nearest 6-hour block
+        const hour = slotDate.getUTCHours()
+        const roundedHour = Math.floor(hour / 6) * 6
+        slotDate.setUTCHours(roundedHour, 0, 0, 0)
+        const hourStr = roundedHour.toString().padStart(2, '0')
+        const key = slotDate.toISOString().slice(0, 11) + hourStr + ':00:00.000Z'
+        // Avoid duplicates from rounding
+        if (result.length === 0 || result[result.length - 1].date !== key) {
+          result.push({ date: key, count: dataMap.get(key) || 0 })
+        }
+      }
+    }
     else if (days <= 90) {
       // Daily slots
       const interval = 24 * 60 * 60 * 1000 // 1 day
+
       for (let i = days - 1; i >= 0; i--) {
         const slotDate = new Date(now.getTime() - i * interval)
         slotDate.setUTCHours(0, 0, 0, 0)
@@ -247,6 +287,7 @@ export default defineEventHandler(async (event) => {
       // Weekly slots (ISO week format: YYYY-WXX)
       const interval = 7 * 24 * 60 * 60 * 1000 // 1 week
       const weeks = Math.ceil(days / 7)
+
       for (let i = weeks - 1; i >= 0; i--) {
         const slotDate = new Date(now.getTime() - i * interval)
         // Get ISO week number
