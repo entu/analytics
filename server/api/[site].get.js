@@ -23,8 +23,8 @@ export default defineEventHandler(async (event) => {
   startDate.setDate(startDate.getDate() - days)
 
   const dateFilter = { date: { $gte: startDate }, 'browser.name': { $ne: 'Chrome Headless' } }
-  const pageviewFilter = { ...dateFilter, 'event.type': 'pageview' }
-  const eventFilter = { ...dateFilter, 'event.type': { $ne: 'pageview' } }
+  const pageviewFilter = { ...dateFilter, $or: [{ 'event.type': 'pageview' }, { event: { $exists: false } }] }
+  const eventFilter = { ...dateFilter, 'event.type': { $exists: true, $ne: 'pageview' } }
 
   // Determine time slot granularity based on period
   const getDateGroupExpression = () => {
