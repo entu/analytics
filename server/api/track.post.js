@@ -46,11 +46,11 @@ export default defineEventHandler(async (event) => {
     event: body.event
   }
 
-  // Remove empty values (null, undefined, empty string, empty object)
+  // Remove empty values (null, undefined, empty string, empty object) but keep Date objects
   const cleanDocument = Object.fromEntries(
     Object.entries(document).filter(([_, value]) => {
       if (value === null || value === undefined || value === '') return false
-      if (typeof value === 'object' && Object.keys(value).length === 0) return false
+      if (typeof value === 'object' && !(value instanceof Date) && Object.keys(value).length === 0) return false
       return true
     })
   )
