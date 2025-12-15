@@ -318,7 +318,7 @@ export default defineEventHandler(async (event) => {
     dailyVisitors: fillTimeSlots(dailyVisitors),
     dailySessions: fillTimeSlots(dailySessions),
     topPages: topPages.map((p) => ({ label: p._id, value: p.count })),
-    topReferrers: topReferrers.map((r) => ({ label: r._id, value: r.count })),
+    topReferrers: topReferrers.map((r) => ({ label: r._id?.replace(/^https?:\/\//, '').replace(/\/$/, ''), value: r.count })),
     topCountries: topCountries.map((c) => ({ label: c._id, value: c.count })),
     topOS: topOS.map((o) => ({ label: o._id, value: o.count })),
     topBrowsers: topBrowsers.map((b) => ({ label: b._id, value: b.count })),
