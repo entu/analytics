@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - days)
 
-  const dateFilter = { date: { $gte: startDate } }
+  const dateFilter = { date: { $gte: startDate }, 'browser.name': { $ne: 'Chrome Headless' } }
   const pageviewFilter = { ...dateFilter, 'event.type': 'pageview' }
   const eventFilter = { ...dateFilter, 'event.type': { $ne: 'pageview' } }
 
