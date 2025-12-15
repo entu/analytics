@@ -189,24 +189,30 @@ export default defineEventHandler(async (event) => {
 
     // Top referrers (extract domain + path only, strip protocol and query params, exclude same domain)
     collection.aggregate([
-      { $match: { ...dateFilter, referrer: { $exists: true, $ne: null } } },
+      { $match: dateFilter },
       {
         $addFields: {
           cleanReferrer: {
-            $trim: {
-              input: {
-                $replaceAll: {
+            $cond: {
+              if: { $or: [{ $eq: ['$referrer', null] }, { $eq: [{ $type: '$referrer' }, 'missing'] }] },
+              then: null,
+              else: {
+                $trim: {
                   input: {
-                    $arrayElemAt: [
-                      { $split: [{ $replaceAll: { input: '$referrer', find: 'https://', replacement: '' } }, '?'] },
-                      0
-                    ]
+                    $replaceAll: {
+                      input: {
+                        $arrayElemAt: [
+                          { $split: [{ $replaceAll: { input: '$referrer', find: 'https://', replacement: '' } }, '?'] },
+                          0
+                        ]
+                      },
+                      find: 'http://',
+                      replacement: ''
+                    }
                   },
-                  find: 'http://',
-                  replacement: ''
+                  chars: '/'
                 }
-              },
-              chars: '/'
+              }
             }
           }
         }
@@ -214,7 +220,10 @@ export default defineEventHandler(async (event) => {
       {
         $match: {
           $expr: {
-            $not: { $regexMatch: { input: '$cleanReferrer', regex: { $concat: ['^', '$domain'] } } }
+            $or: [
+              { $eq: ['$cleanReferrer', null] },
+              { $not: { $regexMatch: { input: '$cleanReferrer', regex: { $concat: ['^', '$domain'] } } } }
+            ]
           }
         }
       },
