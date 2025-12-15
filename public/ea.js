@@ -58,30 +58,40 @@
     return userId
   }
 
+  const sensitiveParams = [
+    'access_token',
+    'api_key',
+    'auth',
+    'state',
+    'session',
+    'session_id',
+    'code',
+    'key',
+    'password',
+    'refresh_token',
+    'secret',
+    'token'
+  ]
+
   function cleanupQuery (queryString) {
     if (!queryString) return ''
 
     const params = new URLSearchParams(queryString)
-    const sensitiveParams = [
-      'access_token',
-      'api_key',
-      'auth',
-      'state',
-      'session',
-      'session_id',
-      'code',
-      'key',
-      'password',
-      'refresh_token',
-      'secret',
-      'token'
-    ]
 
     sensitiveParams.forEach((param) => {
       params.delete(param)
     })
 
     return params.toString()
+  }
+
+  function cleanupReferrer (referrer) {
+    if (!referrer) return ''
+
+    const url = new URL(referrer)
+    url.search = cleanupQuery(url.search)
+
+    return url.toString()
   }
 
   function track (eventType = 'pageview', eventData = {}) {
@@ -93,7 +103,7 @@
       path: location.pathname,
       query: cleanupQuery(location.search),
       title: document.title,
-      referrer: document.referrer,
+      referrer: cleanupReferrer(document.referrer),
       language: navigator.language,
       session: getSessionId(),
       user: getUserId(),
