@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true
@@ -9,6 +9,22 @@ defineProps({
     required: true
   }
 })
+
+const { showPercentage, toggleDisplay } = useTopCardDisplay()
+
+const total = computed(() => props.items.reduce((sum, item) => sum + item.value, 0))
+
+function formatValue (value) {
+  if (showPercentage.value && total.value > 0) {
+    return Math.round((value / total.value) * 100) + '%'
+  }
+  return value
+}
+
+function getBarWidth (value) {
+  if (total.value === 0) return '0%'
+  return Math.round((value / total.value) * 100) + '%'
+}
 </script>
 
 <template>
@@ -24,15 +40,22 @@ defineProps({
     </div>
     <div
       v-else
-      class="divide-y divide-gray-100"
+      class="space-y-1.5"
     >
       <div
         v-for="(item, idx) in items"
         :key="idx"
-        class="flex items-center justify-between py-2"
+        class="relative flex items-center justify-between px-2 py-1"
       >
-        <span class="truncate text-sm text-gray-600">{{ item.label || '-' }}</span>
-        <span class="ml-2 text-sm font-medium text-gray-900">{{ item.value }}</span>
+        <div
+          class="absolute inset-y-0 left-0 rounded bg-slate-100"
+          :style="{ width: getBarWidth(item.value) }"
+        />
+        <span class="relative truncate text-sm text-gray-600">{{ item.label || '-' }}</span>
+        <span
+          class="relative ml-2 cursor-pointer text-sm font-medium text-gray-900 hover:text-blue-600"
+          @click="toggleDisplay"
+        >{{ formatValue(item.value) }}</span>
       </div>
     </div>
   </div>
