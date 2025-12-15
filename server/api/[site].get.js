@@ -189,7 +189,7 @@ export default defineEventHandler(async (event) => {
 
     // Top referrers
     collection.aggregate([
-      { $match: { ...dateFilter, referrer: { $ne: '', $exists: true } } },
+      { $match: dateFilter },
       { $group: { _id: '$referrer', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
@@ -197,7 +197,7 @@ export default defineEventHandler(async (event) => {
 
     // Top countries
     collection.aggregate([
-      { $match: { ...dateFilter, country: { $exists: true, $ne: null } } },
+      { $match: dateFilter },
       { $group: { _id: '$country', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
@@ -205,7 +205,7 @@ export default defineEventHandler(async (event) => {
 
     // Top OS
     collection.aggregate([
-      { $match: { ...dateFilter, 'os.name': { $exists: true } } },
+      { $match: dateFilter },
       { $group: { _id: '$os.name', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
@@ -213,7 +213,7 @@ export default defineEventHandler(async (event) => {
 
     // Top browsers
     collection.aggregate([
-      { $match: { ...dateFilter, 'browser.name': { $exists: true } } },
+      { $match: dateFilter },
       { $group: { _id: '$browser.name', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
