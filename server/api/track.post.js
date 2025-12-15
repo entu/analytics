@@ -20,31 +20,42 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await insertDocument({
+  const document = {
     date: new Date(),
     site: body.site,
-    domain: body.domain || undefined,
-    path: body.path || undefined,
-    query: body.query || undefined,
-    title: body.title || undefined,
-    referrer: body.referrer || undefined,
-    ip: clientIP || undefined,
-    country: location.country || undefined,
-    region: location.region || undefined,
-    city: location.city || undefined,
-    ua: userAgent || undefined,
-    device: agent.device || undefined,
-    cpu: agent.cpu || undefined,
-    os: agent.os || undefined,
-    browser: agent.browser || undefined,
-    engine: agent.engine || undefined,
-    screen: body.screen || undefined,
-    viewport: body.viewport || undefined,
-    language: body.language || undefined,
-    user: body.user || undefined,
-    session: body.session || undefined,
-    event: body.event || undefined
-  })
+    domain: body.domain,
+    path: body.path,
+    query: body.query,
+    title: body.title,
+    referrer: body.referrer,
+    ip: clientIP,
+    country: location.country,
+    region: location.region,
+    city: location.city,
+    ua: userAgent,
+    device: agent.device,
+    cpu: agent.cpu,
+    os: agent.os,
+    browser: agent.browser,
+    engine: agent.engine,
+    screen: body.screen,
+    viewport: body.viewport,
+    language: body.language,
+    user: body.user,
+    session: body.session,
+    event: body.event
+  }
+
+  // Remove empty values (null, undefined, empty string, empty object)
+  const cleanDocument = Object.fromEntries(
+    Object.entries(document).filter(([_, value]) => {
+      if (value === null || value === undefined || value === '') return false
+      if (typeof value === 'object' && Object.keys(value).length === 0) return false
+      return true
+    })
+  )
+
+  await insertDocument(cleanDocument)
 
   return { success: true }
 })
