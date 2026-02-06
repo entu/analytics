@@ -13,7 +13,6 @@
     "start": "node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
     "cleanup": "nuxt cleanup",
     "minify-script": "terser public/ea.js -o public/ea.min.js -c -m"
   },
